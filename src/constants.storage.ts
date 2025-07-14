@@ -64,6 +64,7 @@ export type DeprecatedGlobalStorage = {
 
 export type GlobalStorage = {
 	'ai:mcp:attemptInstall': string;
+	'ai:mcp:installPath': string;
 	avatars: [string, StoredAvatar][];
 	'confirm:ai:generateCommits': boolean;
 	'confirm:ai:generateRebase': boolean;

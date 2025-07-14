@@ -260,6 +260,7 @@ export class GkCliIntegrationProvider implements Disposable {
 
 						// Check using stat to make sure the newly extracted file exists.
 						await workspace.fs.stat(mcpExtractedPath);
+						await this.container.storage.store('ai:mcp:installPath', mcpExtractedFolderPath.fsPath);
 					} catch (error) {
 						const errorMsg = `Failed to extract MCP installer: ${error}`;
 						Logger.error(errorMsg);
@@ -397,29 +398,11 @@ export class GkCliIntegrationProvider implements Disposable {
 						throw new Error(errorMsg);
 					}
 				} finally {
-					// Always clean up downloaded/extracted files, even if something failed
 					if (mcpInstallerPath != null) {
 						try {
 							await workspace.fs.delete(mcpInstallerPath);
 						} catch (error) {
 							Logger.warn(`Failed to delete MCP installer zip file: ${error}`);
-						}
-					}
-
-					if (mcpExtractedPath != null) {
-						try {
-							await workspace.fs.delete(mcpExtractedPath);
-						} catch (error) {
-							Logger.warn(`Failed to delete MCP extracted executable: ${error}`);
-						}
-					}
-
-					if (mcpExtractedFolderPath != null) {
-						try {
-							await workspace.fs.delete(Uri.joinPath(mcpExtractedFolderPath, 'README.md'));
-							await workspace.fs.delete(mcpExtractedFolderPath);
-						} catch (error) {
-							Logger.warn(`Failed to delete MCP extracted folder: ${error}`);
 						}
 					}
 				}
@@ -458,13 +441,14 @@ export class GkCliIntegrationProvider implements Disposable {
 
 	private async onSubscriptionChanged(e: SubscriptionChangeEvent): Promise<void> {
 		const mcpInstallStatus = this.container.storage.get('ai:mcp:attemptInstall');
-		const mcpDirectoryPath = this.container.storage.get('gk:cli:installedPath');
+		const mcpInstallPath = this.container.storage.get('ai:mcp:installPath');
+
 		const platform = getPlatform();
 		if (
 			e.current?.account?.id != null &&
 			e.current.account.id !== e.previous?.account?.id &&
 			mcpInstallStatus === 'completed' &&
-			mcpDirectoryPath != null
+			mcpInstallPath != null
 		) {
 			const currentSessionToken = (await this.container.subscription.getAuthenticationSession())?.accessToken;
 			if (currentSessionToken != null) {
@@ -473,7 +457,7 @@ export class GkCliIntegrationProvider implements Disposable {
 						platform === 'windows' ? 'gk.exe' : './gk',
 						['auth', 'login', '-t', currentSessionToken],
 						'utf8',
-						{ cwd: mcpDirectoryPath },
+						{ cwd: mcpInstallPath },
 					);
 				} catch {}
 			}
