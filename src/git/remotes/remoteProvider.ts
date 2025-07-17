@@ -16,6 +16,7 @@ import type { GitRevisionRangeNotation } from '../models/revision';
 
 export type RemoteProviderId =
 	| 'azure-devops'
+	| 'azure-devops-server'
 	| 'bitbucket'
 	| 'bitbucket-server'
 	| 'custom'

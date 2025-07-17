@@ -180,6 +180,7 @@ export class EnrichmentService implements Disposable {
 
 const supportedRemoteProvidersToEnrich: Record<RemoteProvider['id'], EnrichedItemResponse['provider'] | undefined> = {
 	'azure-devops': 'azure',
+	'azure-devops-server': 'azure',
 	bitbucket: 'bitbucket',
 	'bitbucket-server': 'bitbucket',
 	custom: undefined,

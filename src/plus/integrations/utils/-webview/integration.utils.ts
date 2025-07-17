@@ -36,6 +36,8 @@ export function convertRemoteProviderIdToIntegrationId(
 	switch (remoteProviderId) {
 		case 'azure-devops':
 			return GitCloudHostIntegrationId.AzureDevOps;
+		case 'azure-devops-server':
+			return GitSelfManagedHostIntegrationId.AzureDevOpsServer;
 		case 'bitbucket':
 			return GitCloudHostIntegrationId.Bitbucket;
 		case 'github':
@@ -68,6 +70,7 @@ export function getIntegrationIdForRemote(
 ): GitCloudHostIntegrationId | GitSelfManagedHostIntegrationId | undefined {
 	switch (remote.provider?.id) {
 		case 'azure-devops':
+		case 'azure-devops-server':
 			if (isAzureCloudDomain(remote.provider.domain)) {
 				return GitCloudHostIntegrationId.AzureDevOps;
 			}

@@ -155,6 +155,10 @@ export function toGraphHostingServiceType(id: string): GraphHostingServiceType |
 		case GitCloudHostIntegrationId.AzureDevOps:
 			return 'azureDevops';
 
+		case 'azure-devops-server' satisfies RemoteProviderId:
+		case GitSelfManagedHostIntegrationId.AzureDevOpsServer:
+			return 'azureDevopsServer';
+
 		case 'bitbucket' satisfies RemoteProviderId:
 		case 'bitbucket' satisfies Unbrand<GkProviderId>:
 		case GitCloudHostIntegrationId.Bitbucket:
