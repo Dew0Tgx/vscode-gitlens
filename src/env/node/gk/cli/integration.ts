@@ -1,4 +1,3 @@
-import { homedir } from 'os';
 import { arch } from 'process';
 import type { ConfigurationChangeEvent } from 'vscode';
 import { version as codeVersion, Disposable, env, ProgressLocation, Uri, window, workspace } from 'vscode';
@@ -93,7 +92,7 @@ export class GkCliIntegrationProvider implements Disposable {
 				return;
 			}
 
-			await this.container.storage.store('ai:mcp:attemptInstall', 'attempted');
+			void this.container.storage.store('ai:mcp:attemptInstall', 'attempted').catch();
 
 			if (configuration.get('ai.enabled') === false) {
 				const message = 'Cannot install MCP: AI is disabled in settings';
@@ -260,7 +259,7 @@ export class GkCliIntegrationProvider implements Disposable {
 
 						// Check using stat to make sure the newly extracted file exists.
 						await workspace.fs.stat(mcpExtractedPath);
-						await this.container.storage.store('ai:mcp:installPath', mcpExtractedFolderPath.fsPath);
+						void this.container.storage.store('ai:mcp:installPath', mcpExtractedFolderPath.fsPath).catch();
 					} catch (error) {
 						const errorMsg = `Failed to extract MCP installer: ${error}`;
 						Logger.error(errorMsg);
@@ -289,10 +288,6 @@ export class GkCliIntegrationProvider implements Disposable {
 						}
 					}
 
-					// Get the VS Code settings.json file path in case we are on VSCode Insiders
-					// TODO: Use this path to point to the current vscode profile's settings.json once the API supports it.
-					const settingsPath = `${this.container.context.globalStorageUri.fsPath}\\..\\..\\settings.json`;
-
 					// Configure the MCP server in settings.json
 					try {
 						const installOutput = await run(
@@ -303,59 +298,9 @@ export class GkCliIntegrationProvider implements Disposable {
 						);
 						const directory = installOutput.match(/Directory: (.*)/);
 						let directoryPath;
-						if (directory != null) {
-							try {
-								directoryPath = directory[1];
-								await this.container.storage.store('gk:cli:installedPath', directoryPath);
-								// Add to PATH
-								if (platform === 'windows') {
-									await run(
-										'powershell.exe',
-										[
-											'-Command',
-											`[Environment]::SetEnvironmentVariable('Path', $env:Path + ';${directoryPath}', [EnvironmentVariableTarget]::User)`,
-										],
-										'utf8',
-									);
-								} else {
-									// For Unix-like systems, detect and modify the appropriate shell profile
-									const homeDir = homedir();
-									// Try to detect which shell profile exists and is in use
-									const possibleProfiles = [
-										{ path: `${homeDir}/.zshrc`, shell: 'zsh' },
-										{ path: `${homeDir}/.zprofile`, shell: 'zsh' },
-										{ path: `${homeDir}/.bashrc`, shell: 'bash' },
-										{ path: `${homeDir}/.profile`, shell: 'sh' },
-									];
-
-									// Find the first profile that exists
-									let shellProfile;
-									for (const profile of possibleProfiles) {
-										try {
-											await workspace.fs.stat(Uri.file(profile.path));
-											shellProfile = profile.path;
-											break;
-										} catch {
-											// Profile doesn't exist, try next one
-										}
-									}
-
-									if (shellProfile != null) {
-										await run(
-											'sh',
-											[
-												'-c',
-												`echo '# Added by GitLens for MCP support' >> ${shellProfile} && echo 'export PATH="$PATH:${directoryPath}"' >> ${shellProfile}`,
-											],
-											'utf8',
-										);
-									} else {
-										Logger.warn('MCP Install: Failed to find shell profile to update PATH');
-									}
-								}
-							} catch (error) {
-								Logger.warn(`MCP Install: Failed to add directory to PATH: ${error}`);
-							}
+						if (directory != null && directory.length > 1) {
+							directoryPath = directory[1];
+							void this.container.storage.store('gk:cli:installedPath', directoryPath).catch();
 						} else {
 							Logger.warn('MCP Install: Failed to find directory in install output');
 							if (appName === 'vscode') {
@@ -375,7 +320,7 @@ export class GkCliIntegrationProvider implements Disposable {
 						} else {
 							await run(
 								platform === 'windows' ? mcpFileName : `./${mcpFileName}`,
-								['mcp', 'install', appName, ...(isInsiders ? ['--file-path', settingsPath] : [])],
+								['mcp', 'install', appName],
 								'utf8',
 								{ cwd: mcpExtractedFolderPath.fsPath },
 							);
@@ -425,7 +370,7 @@ export class GkCliIntegrationProvider implements Disposable {
 			}
 
 			// Show success notification if not silent
-			await this.container.storage.store('ai:mcp:attemptInstall', 'completed');
+			void this.container.storage.store('ai:mcp:attemptInstall', 'completed').catch();
 			void window.showInformationMessage('GitKraken MCP integration installed successfully');
 		} catch (error) {
 			Logger.error(`Error during MCP installation: ${error}`);
