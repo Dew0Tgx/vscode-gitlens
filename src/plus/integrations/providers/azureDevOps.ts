@@ -578,6 +578,6 @@ export function isAzureCloudDomain(domain: string | undefined): boolean {
 	return domain != null && azureCloudDomainRegex.test(domain);
 }
 
-function convertTokentoPAT(accessToken: string): string {
+export function convertTokentoPAT(accessToken: string): string {
 	return base64(`PAT:${accessToken}`);
 }

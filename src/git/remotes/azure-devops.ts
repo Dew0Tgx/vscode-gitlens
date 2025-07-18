@@ -3,6 +3,7 @@ import type { AutolinkReference, DynamicAutolinkReference } from '../../autolink
 import type { Source } from '../../constants.telemetry';
 import type { Container } from '../../container';
 import { GitHostIntegration } from '../../plus/integrations/models/gitHostIntegration';
+import type { AzureRepositoryDescriptor } from '../../plus/integrations/providers/azure/models';
 import { isVsts, parseAzureHttpsUrl } from '../../plus/integrations/providers/azure/models';
 import { convertRemoteProviderIdToIntegrationId } from '../../plus/integrations/utils/-webview/integration.utils';
 import type { Brand, Unbrand } from '../../system/brand';
@@ -89,6 +90,14 @@ export class AzureDevOpsRemote extends RemoteProvider {
 
 					type: 'issue',
 					description: `${this.name} Work Item #<num>`,
+					descriptor:
+						typeof this.repoDesc?.owner === 'string' && typeof this.repoDesc?.name === 'string'
+							? ({
+									key: this.remoteKey,
+									owner: this.repoDesc.owner,
+									name: this.repoDesc.name,
+								} satisfies AzureRepositoryDescriptor)
+							: undefined,
 				},
 				{
 					// Default Pull request message when merging a PR in ADO. Will not catch commits & pushes following a different pattern.
@@ -100,6 +109,14 @@ export class AzureDevOpsRemote extends RemoteProvider {
 
 					type: 'pullrequest',
 					description: `${this.name} Pull Request #<num>`,
+					descriptor:
+						typeof this.repoDesc?.owner === 'string' && typeof this.repoDesc?.name === 'string'
+							? ({
+									key: this.remoteKey,
+									owner: this.repoDesc.owner,
+									name: this.repoDesc.name,
+								} satisfies AzureRepositoryDescriptor)
+							: undefined,
 				},
 			];
 		}

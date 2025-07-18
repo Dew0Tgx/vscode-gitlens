@@ -44,6 +44,34 @@ export class AzureDevOpsServerIntegration extends GitHostIntegration<
 		return `${protocol}//${this.domain}`;
 	}
 
+	// private _accounts: Map<string, Account | undefined> | undefined;
+	// protected override async getProviderCurrentAccount({
+	// 	accessToken,
+	// }: AuthenticationSession): Promise<Account | undefined> {
+	// 	this._accounts ??= new Map<string, Account | undefined>();
+
+	// 	const cachedAccount = this._accounts.get(accessToken);
+	// 	if (cachedAccount == null) {
+	// 		const api = await this.getProvidersApi();
+	// 		const user = await api.getCurrentUser(this.id, { accessToken: accessToken });
+	// 		this._accounts.set(
+	// 			accessToken,
+	// 			user
+	// 				? {
+	// 						provider: this,
+	// 						id: user.id,
+	// 						name: user.name ?? undefined,
+	// 						email: user.email ?? undefined,
+	// 						avatarUrl: user.avatarUrl ?? undefined,
+	// 						username: user.username ?? undefined,
+	// 					}
+	// 				: undefined,
+	// 		);
+	// 	}
+
+	// 	return this._accounts.get(accessToken);
+	// }
+
 	protected override async mergeProviderPullRequest(
 		{ accessToken }: AuthenticationSession,
 		pr: PullRequest,
@@ -52,7 +80,27 @@ export class AzureDevOpsServerIntegration extends GitHostIntegration<
 		},
 	): Promise<boolean> {
 		return Promise.resolve(false);
+		// const api = await this.getProvidersApi();
+		// if (pr.refs == null || pr.project == null) return false;
+
+		// try {
+		// 	const merged = await api.mergePullRequest(this.id, pr, {
+		// 		...options,
+		// 		accessToken: convertTokentoPAT(accessToken),
+		// 		isPAT: true,
+		// 	});
+		// 	return merged;
+		// } catch (ex) {
+		// 	void this.showMergeErrorMessage(ex);
+		// 	return false;
+		// }
 	}
+
+	// private async showMergeErrorMessage(ex: Error) {
+	// 	await window.showErrorMessage(
+	// 		`${ex.message}. Check branch policies, and ensure you have the necessary permissions to merge the pull request.`,
+	// 	);
+	// }
 
 	protected override async getProviderAccountForCommit(
 		{ accessToken }: AuthenticationSession,
@@ -84,6 +132,64 @@ export class AzureDevOpsServerIntegration extends GitHostIntegration<
 		return Promise.resolve(undefined);
 	}
 
+	// private _organizations: Map<string, AzureOrganizationDescriptor[] | undefined> | undefined;
+	// private async getProviderResourcesForUser(
+	// 	session: AuthenticationSession,
+	// 	force: boolean = false,
+	// ): Promise<AzureOrganizationDescriptor[] | undefined> {
+	// 	this._organizations ??= new Map<string, AzureOrganizationDescriptor[] | undefined>();
+	// 	const { accessToken } = session;
+
+	// 	const cachedResources = this._organizations.get(accessToken);
+	// 	if (cachedResources == null || force) {
+	// 		const api = await this.getProvidersApi();
+	// 		const account = await this.getProviderCurrentAccount(session);
+	// 		if (account?.id == null) return undefined;
+
+	// 		const resources = await api.getAzureResourcesForUser(account.id, { accessToken: accessToken });
+	// 		this._organizations.set(
+	// 			accessToken,
+	// 			resources != null ? resources.map(r => ({ ...r, key: r.id })) : undefined,
+	// 		);
+	// 	}
+
+	// 	return this._organizations.get(accessToken);
+	// }
+
+	// private _projects: Map<string, AzureProjectDescriptor[] | undefined> | undefined;
+	// private async getProviderProjectsForResources(
+	// 	{ accessToken }: AuthenticationSession,
+	// 	resources: AzureOrganizationDescriptor[],
+	// 	force: boolean = false,
+	// ): Promise<AzureProjectDescriptor[] | undefined> {
+	// 	this._projects ??= new Map<string, AzureProjectDescriptor[] | undefined>();
+
+	// 	const cachedProjects = this._projects.get(accessToken);
+	// 	if (cachedProjects == null || force) {
+	// 		const api = await this.getProvidersApi();
+
+	// 		const projects = (
+	// 			await Promise.all(
+	// 				resources.map(async r => {
+	// 					const projectsResponse = await api.getAzureProjectsForResource(r.resourceName as string, {
+	// 						accessToken: accessToken,
+	// 					});
+	// 					return projectsResponse.values.map(p => ({
+	// 						...p,
+	// 						resourceName: r.resourceName as string,
+	// 						resourceId: r.id,
+	// 						key: p.id,
+	// 					}));
+	// 				}),
+	// 			)
+	// 		).flat();
+
+	// 		this._projects.set(accessToken, projects);
+	// 	}
+
+	// 	return this._projects.get(accessToken);
+	// }
+
 	protected override async getProviderDefaultBranch(
 		_session: AuthenticationSession,
 		_repo: AzureRepositoryDescriptor,
@@ -96,7 +202,9 @@ export class AzureDevOpsServerIntegration extends GitHostIntegration<
 		repo: AzureRepositoryDescriptor,
 		id: string,
 	): Promise<IssueOrPullRequest | undefined> {
-		return Promise.resolve(undefined);
+		return (await this.container.azure)?.getIssueOrPullRequest(this, accessToken, repo.owner, repo.name, id, {
+			baseUrl: this.apiBaseUrl,
+		});
 	}
 
 	protected override async getProviderIssue(

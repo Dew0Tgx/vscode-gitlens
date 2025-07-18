@@ -81,7 +81,7 @@ export async function toRepositoryShapeWithProvider(
 			icon: remote.provider.icon === 'remote' ? 'cloud' : remote.provider.icon,
 			integration: remote.supportsIntegration()
 				? {
-						id: getIntegrationIdForRemote(remote)!,
+						id: getIntegrationIdForRemote(remote.provider)!,
 						connected: remote.maybeIntegrationConnected ?? false,
 					}
 				: undefined,

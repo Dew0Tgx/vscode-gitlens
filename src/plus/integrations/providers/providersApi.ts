@@ -275,6 +275,39 @@ export class ProvidersApi {
 				) as GetReposForAzureProjectFn,
 				mergePullRequestFn: providerApis.azureDevOps.mergePullRequest.bind(providerApis.azureDevOps),
 			},
+			[GitSelfManagedHostIntegrationId.AzureDevOpsServer]: {
+				...providersMetadata[GitSelfManagedHostIntegrationId.AzureDevOpsServer],
+				provider: providerApis.azureDevOps,
+				getRepoOfProjectFn: providerApis.azureDevOps.getRepo.bind(providerApis.azureDevOps),
+				getCurrentUserFn: providerApis.azureDevOps.getCurrentUser.bind(
+					providerApis.azureDevOps,
+				) as GetCurrentUserFn,
+				getCurrentUserForInstanceFn: providerApis.azureDevOps.getCurrentUserForInstance.bind(
+					providerApis.azureDevOps,
+				) as GetCurrentUserForInstanceFn,
+				getAzureResourcesForUserFn: providerApis.azureDevOps.getOrgsForUser.bind(
+					providerApis.azureDevOps,
+				) as GetAzureResourcesForUserFn,
+				getAzureProjectsForResourceFn: providerApis.azureDevOps.getAzureProjects.bind(
+					providerApis.azureDevOps,
+				) as GetAzureProjectsForResourceFn,
+				getPullRequestsForReposFn: providerApis.azureDevOps.getPullRequestsForRepos.bind(
+					providerApis.azureDevOps,
+				) as GetPullRequestsForReposFn,
+				getPullRequestsForRepoFn: providerApis.azureDevOps.getPullRequestsForRepo.bind(
+					providerApis.azureDevOps,
+				) as GetPullRequestsForRepoFn,
+				getPullRequestsForAzureProjectsFn: providerApis.azureDevOps.getPullRequestsForProjects.bind(
+					providerApis.azureDevOps,
+				) as GetPullRequestsForAzureProjectsFn,
+				getIssuesForAzureProjectFn: providerApis.azureDevOps.getIssuesForAzureProject.bind(
+					providerApis.azureDevOps,
+				) as GetIssuesForAzureProjectFn,
+				getReposForAzureProjectFn: providerApis.azureDevOps.getReposForAzureProject.bind(
+					providerApis.azureDevOps,
+				) as GetReposForAzureProjectFn,
+				mergePullRequestFn: providerApis.azureDevOps.mergePullRequest.bind(providerApis.azureDevOps),
+			},
 			[IssuesCloudHostIntegrationId.Jira]: {
 				...providersMetadata[IssuesCloudHostIntegrationId.Jira],
 				provider: providerApis.jira,
